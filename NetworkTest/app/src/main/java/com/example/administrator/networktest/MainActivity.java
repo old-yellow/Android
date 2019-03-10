@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -18,6 +22,8 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.ResponseCache;
 import java.net.URL;
+
+import javax.xml.parsers.SAXParserFactory;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -51,11 +57,11 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     OkHttpClient client = new OkHttpClient();
                     Request request = new Request.Builder()
-                            .url("http://10.0.2.2/get_data.xml")
+                            .url("http://10.0.2.2/get_data.json")
                             .build();
                     Response response = client.newCall(request).execute();
                     String responseData = response.body().string();
-                    parseXMLWithPull(responseData);
+                    parseJSONWithJSONObject(responseData);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -63,41 +69,19 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void parseXMLWithPull(String xmlData){
+    private void parseJSONWithJSONObject(String jsonData){
         try {
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            XmlPullParser xmlPullParser = factory.newPullParser();
-            xmlPullParser.setInput(new StringReader(xmlData));
-            int eventType = xmlPullParser.getEventType();
-            String id = "";
-            String name = "";
-            String version = "";
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                String nodeName = xmlPullParser.getName();
-                switch (eventType) {
-                    //开始解析某个节点
-                    case XmlPullParser.START_TAG:
-                        if ("id".equals(nodeName)) {
-                            id = xmlPullParser.nextText();
-                        } else if ("name".equals(nodeName)) {
-                            name = xmlPullParser.nextText();
-                        } else if ("version".equals(nodeName)) {
-                            version = xmlPullParser.nextText();
-                        }
-                        break;
-                    //完成解析某个节点
-                    case XmlPullParser.END_TAG:
-                        if ("app".equals(nodeName)) {
-                            Log.d(TAG, "id is " + id);
-                            Log.d(TAG, "name is " + name);
-                            Log.d(TAG, "version is " + version);
-                        }
-                        break;
-                    default:
-                        Log.d(TAG, "啥也没有");
-                }
-                eventType = xmlPullParser.next();
+            JSONArray jsonArray = new JSONArray(jsonData);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String id = jsonObject.getString("id");
+                String name = jsonObject.getString("name");
+                String version = jsonObject.getString("version");
+                Log.d(TAG, "id is " + id);
+                Log.d(TAG, "name is " + name);
+                Log.d(TAG, "version is " + version);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
