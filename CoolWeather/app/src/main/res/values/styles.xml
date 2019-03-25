@@ -8,6 +8,4 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="ScActivityTheme" parent="AppTheme"></style>
-
 </resources>

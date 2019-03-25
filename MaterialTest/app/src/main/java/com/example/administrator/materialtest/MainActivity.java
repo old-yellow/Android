@@ -7,6 +7,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
+
+    private SwipeRefreshLayout swipeRefresh;
 
     private StarCraft[] scs = {new StarCraft("pic1", R.drawable.pic1),
             new StarCraft("pic2", R.drawable.pic2), new StarCraft("pic3", R.drawable.pic3),
@@ -74,12 +77,41 @@ public class MainActivity extends AppCompatActivity {
         });
 
         initStarCrafts();
+        swipeRefresh = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshStarCrafts();
+            }
+        });
         RecyclerView recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
         //第二个参数确定每行的数据列数
         GridLayoutManager manager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(manager);
         adapter = new StarCraftAdapter(scList);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void refreshStarCrafts(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        initStarCrafts();
+                        adapter.notifyDataSetChanged();
+                        swipeRefresh.setRefreshing(false);
+                    }
+                });
+            }
+        }).start();
     }
 
     //随机挑选30张图

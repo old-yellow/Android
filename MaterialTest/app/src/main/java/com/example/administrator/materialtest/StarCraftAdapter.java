@@ -1,6 +1,7 @@
 package com.example.administrator.materialtest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -47,7 +48,19 @@ public class StarCraftAdapter extends RecyclerView.Adapter<StarCraftAdapter.View
         }
         View view = LayoutInflater.from(mContext).inflate(R.layout.starcraft_item,
                 parent, false);
-        return new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = holder.getAdapterPosition();
+                StarCraft sc = mScList.get(position);
+                Intent intent = new Intent(mContext, ScActivity.class);
+                intent.putExtra(ScActivity.SC_NAME, sc.getName());
+                intent.putExtra(ScActivity.SC_IMAGE_ID, sc.getImageId());
+                mContext.startActivity(intent);
+            }
+        });
+        return holder;
     }
 
     @Override
